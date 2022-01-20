@@ -7,8 +7,8 @@ use Phalcon\Http\ResponseInterface;
 
 class DefaultController extends BaseController
 {
-    public function index(): ResponseInterface
+    public function indexAction(): ResponseInterface
     {
-        return ResponseResult::success([$this->router->getMatchedRoute()->getPattern()]);
+        return ResponseResult::atSuccess([$this->router->getMatchedRoute()->getPattern()]);
     }
 }

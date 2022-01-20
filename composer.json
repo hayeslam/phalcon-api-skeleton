@@ -11,7 +11,8 @@
     "ext-mbstring": "*",
     "vlucas/phpdotenv": "^5.4",
     "filp/whoops": "^2.14",
-    "fig/http-message-util": "^1.1"
+    "fig/http-message-util": "^1.1",
+    "monolog/monolog": "^2.3"
   },
   "require-dev": {
     "phalcon/dd": "^1.1",

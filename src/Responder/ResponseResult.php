@@ -3,10 +3,16 @@
 namespace App\Responder;
 
 use App\Exceptions\Exception;
+use Fig\Http\Message\StatusCodeInterface;
 use Phalcon\Http\ResponseInterface;
 
-final class ResponseResult
+final class ResponseResult implements StatusCodeInterface
 {
+    const CODE_SUCCEED = 0;
+    const CODE_FAILURE = 400;
+    const CODE_NOT_FOUND = 404;
+    const CODE_SERVER_ERROR = 500;
+
     protected int $code;
     protected string $message;
     protected array $data;
@@ -18,16 +24,16 @@ final class ResponseResult
     /**
      * @param int $code
      * @param string $message
-     * @param array $data
+     * @param array|null $data
      * @param int $httpStatusCode
      */
-    public function __construct(int $code, string $message, array $data = [], int $httpStatusCode = 200)
+    public function __construct(int $code, string $message, ?array $data = null, int $httpStatusCode = self::STATUS_OK)
     {
         $this->response = di('response');
         $this->response->setContentType('application/json');
         $this->code = $code;
         $this->message = $message;
-        $this->data = $data;
+        $this->data = $data ?: [];
         $this->httpStatusCode = $httpStatusCode;
         $this->setPayload();
     }
@@ -59,12 +65,12 @@ final class ResponseResult
      * @param int $httpStatusCode
      * @return ResponseInterface
      */
-    public static function success(
+    public static function atSuccess(
         array $content = [],
         string $message = 'success.',
-        int $httpStatusCode = 200
+        int $httpStatusCode = self::STATUS_OK
     ): ResponseInterface {
-        $result = new ResponseResult(0, $message, $content, $httpStatusCode);
+        $result = new ResponseResult(self::CODE_SUCCEED, $message, $content, $httpStatusCode);
         $response = $result->response;
         $response
             ->setStatusCode($result->httpStatusCode)
@@ -76,27 +82,66 @@ final class ResponseResult
     /**
      * The response result is failure
      *
-     * @param int $code
      * @param string $message
-     * @param array $content
+     * @param array|null $content
+     * @param int $code
      * @param int $httpStatusCode
      * @return ResponseInterface
      * @throws Exception
      */
-    public static function failure(
-        int $code,
+    public static function atFailure(
         string $message = 'failure.',
-        array $content = [],
-        int $httpStatusCode = 500
+        ?array $content = null,
+        int $code = self::CODE_FAILURE,
+        int $httpStatusCode = self::STATUS_INTERNAL_SERVER_ERROR
     ): ResponseInterface {
-        $result = new ResponseResult($code, $message, $content, $httpStatusCode);
+        $result = new ResponseResult($code, $message, null, $httpStatusCode);
         $result->checkErrorCode();
+        $payload = $result->getPayload();
+        unset($payload['data']);
+        $payload = array_merge($payload, $content ?: []);
         $response = $result->response;
         $response
             ->setStatusCode($result->httpStatusCode)
-            ->setJsonContent($result->getPayload());
+            ->setJsonContent($payload);
 
         return $response;
+    }
+
+    /**
+     * @param string $message
+     * @param array|null $content
+     * @param int $code
+     * @param int $httpStatusCode
+     * @return void
+     */
+    public static function atException(
+        string $message = 'exception.',
+        ?array $content = null,
+        int $code = self::CODE_SERVER_ERROR,
+        int $httpStatusCode = self::STATUS_INTERNAL_SERVER_ERROR
+    ): void {
+        try {
+            self::atFailure($message, $content, $code, $httpStatusCode)->send();
+        } catch (\Exception $e) {
+        }
+    }
+
+    /**
+     * Not Found
+     *
+     * @param string|null $path
+     * @return ResponseInterface
+     * @throws Exception
+     */
+    public static function notFound(?string $path = null): ResponseInterface
+    {
+        return self::atFailure(
+            sprintf('%s not found.', $path ?: 'Route'),
+            null,
+            self::CODE_NOT_FOUND,
+            self::STATUS_NOT_FOUND
+        );
     }
 
     /**
@@ -105,7 +150,7 @@ final class ResponseResult
      */
     private function checkErrorCode()
     {
-        if ($this->code == 0) {
+        if ($this->code == self::CODE_SUCCEED) {
             throw new Exception('invalid error code.');
         }
     }

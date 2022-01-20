@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Phalcon\Mvc\Controller as PhController;
+use App\Controller;
 
-class BaseController extends PhController
+class BaseController extends Controller
 {
 }

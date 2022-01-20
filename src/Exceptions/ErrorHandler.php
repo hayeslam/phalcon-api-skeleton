@@ -3,51 +3,82 @@
 namespace App\Exceptions;
 
 use App\Responder\ResponseResult;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 use Whoops\Handler\Handler;
 use Whoops\Handler\JsonResponseHandler;
 
-
 class ErrorHandler extends JsonResponseHandler
 {
+    /**
+     * @return int|null
+     */
     public function handle(): ?int
     {
-        $content = [];
-        // debug trace
-        $shouldAddTrace = $this->addTraceToOutput();
-        if ($shouldAddTrace) {
-            $content['debug']['error'] = $this->getException()->getMessage();
-            $content['debug']['trace'] = $this->getExceptionTrace();
-        }
-        $responseResult = new ResponseResult(
-            $this->getCode(),
-            $this->getMessage(),
-            $content,
-            $this->getHttpStatusCode(),
+        $this->log();
+        // exception response
+        ResponseResult::atException(
+            $this->getErrorMessage(),
+            $this->getErrorContent(),
+            $this->getErrorCode(),
+            $this->getHttpStatusCode()
         );
-        $response = $responseResult->getResponse();
-        $response->setJsonContent($responseResult->getPayload())->send();
 
         return Handler::QUIT;
     }
 
-    protected function getCode(): int
+    private function log()
     {
+        /** @var LoggerInterface $logger */
+        $logger = di('logger');
         $exception = $this->getException();
         if ($exception instanceof \ErrorException) {
-            $code = ErrorCode::SYSTEM_ERROR;
+            $level = LogLevel::ERROR;
+        } elseif (!$exception instanceof ExceptionInterface) {
+            $level = LogLevel::WARNING;
         } else {
-            $code = $this->getException()->getCode() ?: ErrorCode::SYSTEM_ERROR;
+            $level = LogLevel::INFO;
         }
-
-        return $code;
+        $logger->log($level, 'Catch exception.', ['exception' => $this->getException()]);
     }
 
-    protected function getMessage(): string
+    protected function getErrorCode(): int
+    {
+        $exception = $this->getException();
+        return !$exception instanceof Exception || !$exception->getCode()
+            ? ErrorCode::SYSTEM_ERROR
+            : $exception->getCode();
+    }
+
+    protected function getErrorMessage(): string
     {
         $exception = $this->getException();
         return $exception instanceof ExceptionInterface
             ? $exception->getMessage()
-            : ErrorCode::asMessage($this->getCode());
+            : ErrorCode::asMessage($this->getErrorCode());
+    }
+
+    protected function getErrorContent(): array
+    {
+        $content = [];
+        $exception = $this->getException();
+        // todo error detail.
+
+        // exception trace
+        $shouldAddTrace = $this->addTraceToOutput();
+        if ($shouldAddTrace) {
+            if (!$this->getException() instanceof ExceptionInterface) {
+                $content['exception'] = [
+                    'code' => $exception->getCode(),
+                    'message' => $exception->getMessage(),
+                    'trace' => $this->getExceptionTrace(),
+                ];
+            } else {
+                $content['trace'] = $this->getExceptionTrace();
+            }
+        }
+
+        return $content;
     }
 
     protected function getHttpStatusCode(): int
@@ -76,7 +107,7 @@ class ErrorHandler extends JsonResponseHandler
             $plain .= ' in ';
             $plain .= ($frame->getFile() ?: '<#unknown>');
             $plain .= ':';
-            $plain .= (int) $frame->getLine();
+            $plain .= (int)$frame->getLine();
 
             $trace[] = $plain;
 

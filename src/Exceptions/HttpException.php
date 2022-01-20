@@ -18,9 +18,4 @@ class HttpException extends Exception
     {
         return $this->statusCode;
     }
-
-    public static function notFound($message = 'URI not found.', $code = 404): Throwable
-    {
-        return (new static(404, $message, $code));
-    }
 }

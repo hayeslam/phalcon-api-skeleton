@@ -39,3 +39,54 @@ if (!function_exists('di')) {
         return $default;
     }
 }
+
+if (!function_exists('config')) {
+
+    /**
+     * This returns the service provider 'config'.
+     *
+     * @param string|mixed $option If string passed, it will automatically
+     *      interpret as ->get(...), if array it will merge/replace based on
+     *      [$merge_or_default_value = true]
+     * @param bool $merge_or_default_value If true, it will automatically merge, else if false
+     *      it will replace a config
+     * @return mixed|Phalcon\Config
+     */
+    function config($option = null, $merge_or_default_value = true)
+    {
+        $config = di()->get('config');
+
+        # here, if the $option is null
+        # we should directly pass the di 'config'
+        if ($option === null) {
+            return $config;
+        }
+
+        # here, if the option is array
+        # it should interpreted as updating the di 'config'
+        # current structure
+        if (is_array($option)) {
+            if ($merge_or_default_value === true) {
+                $config->merge(new Phalcon\Config($option));
+                $new_config = $config->toArray();
+            } else {
+                $new_config = array_replace_recursive(
+                    $config ? $config->toArray() : [],
+                    $option
+                );
+            }
+
+            # we need to re-initialize the config
+            di()->set('config', function () use ($new_config) {
+                return new Phalcon\Config($new_config);
+            });
+
+            return true;
+        }
+
+        return call_user_func_array(
+            [$config, 'path'],
+            func_get_args()
+        );
+    }
+}

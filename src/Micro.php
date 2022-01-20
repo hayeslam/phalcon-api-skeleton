@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Exceptions\HttpException;
+use App\Middlewares\MicroMiddleware;
 
 class Micro extends \Phalcon\Mvc\Micro
 {
@@ -16,11 +16,9 @@ class Micro extends \Phalcon\Mvc\Micro
     protected function setup()
     {
         $this->setEventsManager($this->di->getShared('eventsManager'));
+        $this->getEventsManager()->attach('micro', new MicroMiddleware());
         $this->attachMiddlewares();
         $this->loadRoutes();
-        $this->notFound(function () {
-            throw HttpException::notFound();
-        });
     }
 
     protected function loadRoutes(): Micro
@@ -37,7 +35,7 @@ class Micro extends \Phalcon\Mvc\Micro
         ];
     }
 
-    public function attachMiddlewares()
+    protected function attachMiddlewares()
     {
         $middlewares = $this->getMiddlewares();
         foreach ($middlewares as $class => $function) {
