@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers;
-use App\Micro;
+use App\Mvc\Micro;
 use Phalcon\Mvc\Micro\Collection as MicroCollection;
 
 /** @var Micro $app */

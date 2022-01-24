@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Controller;
+use App\Mvc\Controller;
 
 class BaseController extends Controller
 {

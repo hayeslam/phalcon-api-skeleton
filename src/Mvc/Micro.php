@@ -1,8 +1,10 @@
 <?php
 
-namespace App;
+namespace App\Mvc;
 
 use App\Middlewares\MicroMiddleware;
+
+use const ROOT_PATH;
 
 class Micro extends \Phalcon\Mvc\Micro
 {

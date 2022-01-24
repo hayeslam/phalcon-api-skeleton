@@ -17,10 +17,10 @@ class ErrorHandler extends JsonResponseHandler
     {
         $this->log();
         // exception response
-        ResponseResult::atException(
+        ResponseResult::asException(
+            $this->getErrorCode(),
             $this->getErrorMessage(),
             $this->getErrorContent(),
-            $this->getErrorCode(),
             $this->getHttpStatusCode()
         );
 
@@ -36,6 +36,8 @@ class ErrorHandler extends JsonResponseHandler
             $level = LogLevel::ERROR;
         } elseif (!$exception instanceof ExceptionInterface) {
             $level = LogLevel::WARNING;
+        } elseif ($exception instanceof InvalidArgumentException) {
+            $level = LogLevel::DEBUG;
         } else {
             $level = LogLevel::INFO;
         }
@@ -62,20 +64,26 @@ class ErrorHandler extends JsonResponseHandler
     {
         $content = [];
         $exception = $this->getException();
-        // todo error detail.
-
+        // error detail
+        if ($exception instanceof Exception) {
+            $messages = $exception->getDetailMessages();
+            if ($messages && $messages->count() > 0) {
+                foreach ($messages as $message) {
+                    $content['error_details'][] = [
+                        'field' => $message->getField(),
+                        'message' => $message->getMessage(),
+                    ];
+                }
+            }
+        }
         // exception trace
         $shouldAddTrace = $this->addTraceToOutput();
         if ($shouldAddTrace) {
-            if (!$this->getException() instanceof ExceptionInterface) {
-                $content['exception'] = [
-                    'code' => $exception->getCode(),
-                    'message' => $exception->getMessage(),
-                    'trace' => $this->getExceptionTrace(),
-                ];
-            } else {
-                $content['trace'] = $this->getExceptionTrace();
+            if (!$exception instanceof ExceptionInterface) {
+                $content['debug']['code'] = $exception->getCode();
+                $content['debug']['message'] = $exception->getMessage();
             }
+            $content['debug']['trace'] = $this->getExceptionTrace();
         }
 
         return $content;

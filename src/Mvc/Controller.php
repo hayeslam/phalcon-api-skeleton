@@ -1,6 +1,8 @@
 <?php
 
-namespace App;
+namespace App\Mvc;
+
+use App\Injectable;
 
 abstract class Controller extends Injectable implements \Phalcon\Mvc\ControllerInterface
 {

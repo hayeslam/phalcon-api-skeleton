@@ -65,7 +65,7 @@ final class ResponseResult implements StatusCodeInterface
      * @param int $httpStatusCode
      * @return ResponseInterface
      */
-    public static function atSuccess(
+    public static function asSuccess(
         array $content = [],
         string $message = 'success.',
         int $httpStatusCode = self::STATUS_OK
@@ -89,7 +89,7 @@ final class ResponseResult implements StatusCodeInterface
      * @return ResponseInterface
      * @throws Exception
      */
-    public static function atFailure(
+    public static function asFailure(
         string $message = 'failure.',
         ?array $content = null,
         int $code = self::CODE_FAILURE,
@@ -115,14 +115,14 @@ final class ResponseResult implements StatusCodeInterface
      * @param int $httpStatusCode
      * @return void
      */
-    public static function atException(
+    public static function asException(
+        int $code = self::CODE_SERVER_ERROR,
         string $message = 'exception.',
         ?array $content = null,
-        int $code = self::CODE_SERVER_ERROR,
         int $httpStatusCode = self::STATUS_INTERNAL_SERVER_ERROR
     ): void {
         try {
-            self::atFailure($message, $content, $code, $httpStatusCode)->send();
+            self::asFailure($message, $content, $code, $httpStatusCode)->send();
         } catch (\Exception $e) {
         }
     }
@@ -136,7 +136,7 @@ final class ResponseResult implements StatusCodeInterface
      */
     public static function notFound(?string $path = null): ResponseInterface
     {
-        return self::atFailure(
+        return self::asFailure(
             sprintf('%s not found.', $path ?: 'Route'),
             null,
             self::CODE_NOT_FOUND,

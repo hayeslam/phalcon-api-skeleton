@@ -8,5 +8,5 @@ use Phalcon\Di\DiInterface;
  */
 require '../bootstrap/autoload.php';
 
-$app = new App\Micro($di);
+$app = new \App\Mvc\Micro($di);
 $app->handle($_SERVER['REQUEST_URI']);
