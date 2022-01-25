@@ -4,7 +4,7 @@ namespace App\Validation;
 
 use App\Exceptions\ErrorCode;
 use App\Exceptions\Exception;
-use App\Exceptions\InvalidArgumentException;
+use App\Exceptions\ValidationException;
 use Phalcon\Messages\Messages;
 use Phalcon\Mvc\Model;
 use Phalcon\Validation\Validator\Alnum as AlNumValidator;
@@ -75,10 +75,10 @@ class Validation extends \Phalcon\Validation
     {
         if ($this->throwError === true) {
             if ($this->displayDetails == true) {
-                $exception = InvalidArgumentException::withCode(ErrorCode::INVALID_PARAMETER);
+                $exception = ValidationException::withCode(ErrorCode::INVALID_PARAMETER);
                 $exception->setDetailMessages($messages);
             } else {
-                $exception = new InvalidArgumentException(
+                $exception = new ValidationException(
                     $messages->current()->getMessage(),
                     ErrorCode::INVALID_PARAMETER
                 );

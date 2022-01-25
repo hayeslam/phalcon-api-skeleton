@@ -36,7 +36,7 @@ class ErrorHandler extends JsonResponseHandler
             $level = LogLevel::ERROR;
         } elseif (!$exception instanceof ExceptionInterface) {
             $level = LogLevel::WARNING;
-        } elseif ($exception instanceof InvalidArgumentException) {
+        } elseif ($exception instanceof ValidationException) {
             $level = LogLevel::DEBUG;
         } else {
             $level = LogLevel::INFO;
