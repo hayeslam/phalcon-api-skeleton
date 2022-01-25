@@ -18,6 +18,14 @@ abstract class Model extends \Phalcon\Mvc\Model
     }
 
     /**
+     * @return \Phalcon\Db\Adapter\AdapterInterface
+     */
+    protected function _getConnection(): \Phalcon\Db\Adapter\AdapterInterface
+    {
+        return $this->getWriteConnection();
+    }
+
+    /**
      * @return static
      */
     public static function instance(): Model
