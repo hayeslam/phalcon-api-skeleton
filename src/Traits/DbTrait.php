@@ -6,41 +6,38 @@ use Phalcon\Db\Adapter\AdapterInterface;
 
 trait DbTrait
 {
-    abstract protected function _getConnection(): AdapterInterface;
-
     /**
-     * @param callable $callable
+     * @param \Closure $callable
      * @param AdapterInterface|null $connection
-     * @return bool|mixed
-     * @throws \Exception
+     * @param bool $nesting
+     * @return bool
+     * @throws \Throwable
      */
-    protected function doTransaction(callable $callable, ?AdapterInterface $connection = null)
-    {
+    protected function doTransaction(
+        \Closure $callable,
+        AdapterInterface $connection = null,
+        bool $nesting = true
+    ): bool {
         if ($connection === null) {
-            $connection = $this->_getConnection();
+            $connection = $this->getDI()->get('db');
         }
         $result = false;
         $exception = null;
+        $connection->begin($nesting);
         try {
-            $connection->begin();
-            $result = call_user_func($callable);
-        } catch (\Exception $e) {
+            $result = $callable($this, $connection);
+        } catch (\Throwable $e) {
             $exception = $e;
         }
         if ($result !== true) {
-            $connection->rollback();
+            $connection->rollback($nesting);
         } else {
-            $connection->commit();
+            $connection->commit($nesting);
         }
         if ($exception) {
             throw $exception;
         }
 
         return $result;
-    }
-
-    public function batchInsert(string $table, $row)
-    {
-        // todo batch insert
     }
 }

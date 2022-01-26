@@ -48,6 +48,7 @@ trait PaginatorTrait
     public function paginate($variable, int $page = 1, int $pageSize = 10, ?callable $formatter = null): array
     {
         $paginator = $this->paginator($variable, [], $page, $pageSize);
+
         return $this->paginateFormat($paginator->paginate(), $formatter);
     }
 
