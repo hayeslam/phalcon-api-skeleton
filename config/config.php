@@ -10,7 +10,7 @@ return [
     ],
     'logger' => [
         'name' => 'main',
-        'level' => Logger::DEBUG,
+        'level' => is_debug() ? Logger::DEBUG : Logger::INFO,
         'stream' => env('APP_LOG_FILE'),
     ],
     'database' => [
