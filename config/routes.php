@@ -11,4 +11,8 @@ $default
     ->setPrefix('/default')
     ->get('/index', 'indexAction');
 
+$app->get('/', function () use ($app) {
+    return $app->response->redirect('/default/index');
+});
+
 $app->mount($default);

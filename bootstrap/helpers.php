@@ -1,5 +1,60 @@
 <?php
 
+if (!function_exists('env')) {
+    /**
+     * @param string $name
+     * @param $default
+     * @return array|mixed|string|null
+     */
+    function env(string $name, $default = null)
+    {
+        $prefix = strval(getenv('ENV_PREFIX'));
+        $name = $prefix . $name;
+        $value = getenv($name);
+        if ($value === false) {
+            $value = $default;
+        } else {
+            $map = ['false' => false, 'true' => true, 'null' => null, 'empty' => ''];
+            $value = $map[$value] ?? $value;
+        }
+
+        return $value;
+    }
+}
+
+if (!function_exists('environment')) {
+    /**
+     * @return bool|string
+     */
+    function environment()
+    {
+        $environment = env('APP_ENV', 'production');
+
+        if (func_num_args() > 0) {
+            $patterns = is_array(func_get_arg(0)) ? func_get_arg(0) : func_get_args();
+
+            foreach ($patterns as $pattern) {
+                if ($pattern === $environment) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return $environment;
+    }
+}
+
+if (!function_exists('is_debug')) {
+    /**
+     * @return bool
+     */
+    function is_debug(): bool
+    {
+        return env('APP_DEBUG', false) === true;
+    }
+}
 
 if (!function_exists('di')) {
     /**

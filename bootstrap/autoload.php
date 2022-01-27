@@ -5,7 +5,6 @@ ini_set('display_errors', 0);
 ini_set('error_reporting', E_ALL);
 
 define('ROOT_PATH', dirname(__DIR__));
-
 require ROOT_PATH . '/vendor/autoload.php';
 
 $dotenv = Dotenv\Dotenv::createUnsafeImmutable(ROOT_PATH);

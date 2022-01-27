@@ -30,8 +30,9 @@ $di->setShared('eventsManager', function () {
 });
 
 $di->setShared('whoops', function () {
+    $addTrace = is_debug() && environment('development');
     $errorHandler = new ErrorHandler;
-    $errorHandler->addTraceToOutput(true);
+    $errorHandler->addTraceToOutput($addTrace);
     $whoops = new WhoopsRun;
     $whoops->appendHandler($errorHandler);
 

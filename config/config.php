@@ -4,23 +4,23 @@ use Monolog\Logger;
 
 return [
     'app' => [
-        'env' => 'development',
-        'name' => 'api',
-        'debug' => true,
+        'env' => env('APP_ENV'),
+        'name' => env('APP_ENV'),
+        'debug' => env('APP_DEBUG'),
     ],
     'logger' => [
         'name' => 'main',
         'level' => Logger::DEBUG,
-        'stream' => getenv('APP_LOG_DIR') . '/app.log',
+        'stream' => env('APP_LOG_FILE'),
     ],
     'database' => [
-        'adapter' => 'mysql',
-        'host' => '127.0.0.1',
-        'port' => '3306',
-        'username' => 'root',
-        'password' => '123123',
-        'dbname' => 'vbt',
-        'charset' => 'utf8mb4',
+        'adapter' => env('DB_ADAPTER'),
+        'host' => env('DB_HOST'),
+        'port' => env('DB_PORT'),
+        'username' => env('DB_USERNAME'),
+        'password' => env('DB_PASSWORD'),
+        'dbname' => env('DB_DBNAME'),
+        'charset' => env('DB_CHARSET'),
         'options' => [
             \PDO::ATTR_EMULATE_PREPARES => false,
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
