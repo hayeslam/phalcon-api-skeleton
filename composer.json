@@ -3,7 +3,7 @@
   "description": "A Phalcon api project skeleton.",
   "type": "project",
   "license": "MIT",
-  "minimum-stability": "dev-master",
+  "minimum-stability": "dev",
   "require": {
     "php": "^7.4",
     "ext-pdo": "*",
